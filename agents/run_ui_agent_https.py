@@ -66,8 +66,8 @@ def get_registry_url():
         print(f"Error reading registry URL: {e}")
     
     # Default if file doesn't exist
-    print("Registry URL file not found. Using default: https://chat.nanda-registry.com:6900")
-    return "https://chat.nanda-registry.com:6900"
+    print("Registry URL file not found. Using default: https://registry.agent-sohandani-rahul.com:6900")
+    return "https://registry.agent-sohandani-rahul.com:6900"
 
 def register_agent(agent_id, public_url):
     """Register the agent with the registry"""
