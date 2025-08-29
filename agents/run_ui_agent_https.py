@@ -10,7 +10,7 @@ import threading
 import json
 from flask import Flask, request, jsonify, Response, stream_with_context
 from flask_cors import CORS
-from python_a2a import A2AClient, Message, TextContent, MessageRole
+from python_a2a import A2AClient, Message, TextContent, MessageRole, Metadata
 from queue import Queue
 from threading import Event
 import ssl
@@ -169,7 +169,7 @@ def send_message():
                 role=MessageRole.USER,
                 content=TextContent(text=message_text),
                 conversation_id=conversation_id,
-                metadata=metadata
+                metadata=Metadata(custom_fields=metadata)
             )
         )
         print(f"Response: {response}")
@@ -212,6 +212,30 @@ def list_agents():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
+
+TX = os.getenv("TRANSACTIONS_BASE_URL")
+AUTH = os.getenv("TX_AUTH_TOKEN")
+
+@app.route('/api/tx/quotes', methods=['POST'])
+def tx_quotes():
+    body = request.json or {}
+    r = requests.post(f"{TX}/v1/quotes", json=body,
+                      headers=({'Authorization': f"Bearer {AUTH}"} if AUTH else {}))
+    return (r.text, r.status_code, {'Content-Type': 'application/json'})
+
+@app.route('/api/tx/invoices', methods=['POST'])
+def tx_invoices():
+    body = request.json or {}
+    r = requests.post(f"{TX}/v1/invoices", json=body,
+                      headers=({'Authorization': f"Bearer {AUTH}"} if AUTH else {}))
+    return (r.text, r.status_code, {'Content-Type': 'application/json'})
+
+@app.route('/api/tx/invoices/<inv_id>/pay', methods=['POST'])
+def tx_pay(inv_id):
+    body = request.json or {}
+    r = requests.post(f"{TX}/v1/invoices/{inv_id}/pay", json=body,
+                      headers=({'Authorization': f"Bearer {AUTH}"} if AUTH else {}))
+    return (r.text, r.status_code, {'Content-Type': 'application/json'})
 
 @app.route('/api/receive_message', methods=['POST'])
 def receive_message():
